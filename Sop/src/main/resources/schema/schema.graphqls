@@ -1,0 +1,58 @@
+
+type User{
+    id: ID!
+    name: String
+    email: String
+    priority: Boolean
+}
+type Tour{
+    id: ID!
+    name : String
+    availableSeats : Int
+}
+type Booking{
+    id: ID!
+    user: User
+    tour: Tour
+}
+input SubmittedUser{
+    name: String
+    email: String
+    priority: Boolean
+}
+input SubmittedTour{
+    title : String
+    description : String
+    availableSeats : Int
+}
+input SubmittedBooking{
+    user: SubmittedUser
+    tour: SubmittedTour
+}
+
+type Query {
+    users(nameFilter: String): [User]
+    tours: [Tour]
+    bookings: [Booking]
+}
+
+
+type Mutation {
+    addUser(user: SubmittedUser): User
+
+    updateUser(id: ID!, user: SubmittedUser): User
+
+    deleteUser(id: ID!): String
+
+    addTour(tour: SubmittedTour): Tour
+
+    updateTour(id: ID!, tour: SubmittedTour): Tour
+
+    deleteTour(id: ID!): String
+
+    addBooking(booking: SubmittedBooking): Booking
+
+#    updateBooking(id: ID!, booking: SubmittedBooking): Booking
+
+    deleteBooking(id: ID!): String
+}
