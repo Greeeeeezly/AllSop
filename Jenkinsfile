@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         WORKSPACE_DIR = "${env.WORKSPACE}"
-        PROJECT_DIR = "/Notiefy-main"
-        GRADLE_CACHE = "/tmp/.gradle"
+        PROJECT_DIR = "/AllSop"
+        MAVEN_CACHE = "/tmp/.m2"
     }
 
     stages {
@@ -18,7 +18,7 @@ pipeline {
                             $class: 'GitSCM',
                             branches: [[name: "*/master"]],
                             userRemoteConfigs: [[
-                                url: 'https://github.com/YurDuiachenko/Notiefy-main.git',
+                                url: 'https://github.com/Greeeeeezly/AllSop.git',
                                 credentialsId: 'github-creds'
                             ]]
                         ])
@@ -30,15 +30,15 @@ pipeline {
         stage('Build') {
             agent {
                 docker {
-                    image 'gradle:8.10.2-jdk17'
-                    args "-u root -v ${GRADLE_CACHE}:/home/gradle/.gradle -v ${WORKSPACE_DIR}:${PROJECT_DIR} --workdir=${PROJECT_DIR}"
+                    image 'maven:3.8.6-openjdk-17'
+                    args "-u root -v ${MAVEN_CACHE}:/root/.m2 -v ${WORKSPACE_DIR}:${PROJECT_DIR} --workdir=${PROJECT_DIR}"
                     reuseNode true
                 }
             }
 
             steps {
                 script {
-                    sh 'gradle clean build -x test'
+                    sh 'mvn clean install -DskipTests'
                 }
             }
         }
