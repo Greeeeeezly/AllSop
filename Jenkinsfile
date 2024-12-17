@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent { docker { image 'maven:3.8.6-openjdk-17' } }
 
     environment {
         WORKSPACE_DIR = "${env.WORKSPACE}"
