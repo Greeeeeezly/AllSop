@@ -1,74 +1,42 @@
 pipeline {
-    agent none
-
+    agent any
     environment {
-        WORKSPACE_DIR = "${env.WORKSPACE}"
-        PROJECT_DIR = "/AllSop"
-        MAVEN_CACHE = "/tmp/.m2"
+        // ИспользуйтеCredentialsID из Jenkins, а не прямой токен
+        GIT_CREDENTIALS_ID = 'github-credentials'
+        GIT_REPO_URL = 'https://github.com/Greeeeeezly/AllSop.git'
+        BRANCH_NAME = 'master' 
     }
-
     stages {
-        stage('Checkout') {
-            agent { label 'agent' }
-
+        stage('Clone Repository') {
             steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
-                        checkout([
-                            $class: 'GitSCM',
-                            branches: [[name: "*/master"]],
-                            userRemoteConfigs: [[
-                                url: 'https://github.com/Greeeeeezly/AllSop.git',
-                                credentialsId: 'github-creds'
-                            ]]
-                        ])
-                    }
-                }
+                // Используйте credentials через Jenkins
+                git branch: env.BRANCH_NAME, 
+                    credentialsId: env.GIT_CREDENTIALS_ID, 
+                    url: env.GIT_REPO_URL
             }
         }
-         stage('Prepare docker-compose') {
-                    steps {
-                        sh '''
-                            curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-                            chmod +x /usr/local/bin/docker-compose
-                        '''
-                    }
-                }
-
         stage('Build') {
-            agent {
-                docker {
-                    image 'maven:3.8.6-openjdk-17'
-                    args "-u root -v ${MAVEN_CACHE}:/root/.m2 -v ${WORKSPACE_DIR}:${PROJECT_DIR} --workdir=${PROJECT_DIR}"
-                    reuseNode true
-                }
-            }
-
             steps {
-                script {
-                    sh 'mvn clean install -DskipTests'
-                }
+                sh 'chmod +x mvnw'
+                sh './mvnw clean install'
             }
         }
-
+        
+        stage('Prepare docker-compose') {
+            steps {
+                sh '''
+                    curl -L "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                    chmod +x /usr/local/bin/docker-compose
+                '''
+            }
+        }
         stage('Deploy') {
-            agent { label 'agent' }
-
             steps {
-                script {
-                    sh 'docker-compose up -d'
-                }
+                sh '''
+                    docker-compose -f docker-compose.yml down || true
+                    docker-compose -f docker-compose.yml up --build -d
+                '''
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-
-        failure {
-            echo 'Pipeline failed.'
         }
     }
 }
