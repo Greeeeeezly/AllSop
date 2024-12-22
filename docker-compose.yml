@@ -16,7 +16,9 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # Можно добавить свой скрипт для инициализации базы данных
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - app-network
 
   rabbitmq:
     image: rabbitmq:management
@@ -25,6 +27,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     restart: always
+    networks:
+      - app-network
 
   app:
     build:
@@ -37,9 +41,16 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sop2
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_RABBITMQ_HOST: rabbitmq
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
         condition: service_started
     restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
