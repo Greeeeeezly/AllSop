@@ -15,6 +15,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # Можно добавить свой скрипт для инициализации базы данных
 
   rabbitmq:
     image: rabbitmq:management
@@ -32,7 +34,7 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/sop2
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sop2
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
     depends_on:
