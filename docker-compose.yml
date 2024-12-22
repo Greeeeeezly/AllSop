@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:11-alpine
     container_name: postgres
+    hostname:  postgres
     environment:
       POSTGRES_DB: sop2
       POSTGRES_USER: postgres
@@ -36,7 +37,7 @@ services:
       dockerfile: dockerfile
     container_name: sop2
     ports:
-      - "8081:8081"
+      - "8079:8079"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sop2
       SPRING_DATASOURCE_USERNAME: postgres
