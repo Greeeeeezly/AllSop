@@ -3,7 +3,7 @@ version: '3.9'
 services:
   postgres:
     image: postgres:11-alpine
-    container_name: postgres
+    container_name: localhost
     environment:
       POSTGRES_DB: sop2
       POSTGRES_USER: postgres
